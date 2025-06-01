@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录管理面板 - Exence</title>
+    <link rel="stylesheet" href="//unpkg.com/element-plus/dist/index.css" />
+    <link rel="stylesheet" href="//cdn.bootcdn.net/ajax/libs/reseter.css/2.0.0/reseter.min.css">
+    <script src="//unpkg.com/vue@3"></script>
+    <script src="//unpkg.com/element-plus"></script>
+    <script src="//cdn.bootcdn.net/ajax/libs/axios/1.9.0/axios.min.js"></script>
+
+    <style>
+        body {
+            background: #fafafa;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        #header {
+            border-bottom: 1px solid #eaeaea;
+            padding: 6px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+        }
+        #header > .brand > img {
+            height: 48px;
+        }
+        #header > .nav {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+        #footer {
+            font-size: 14px;
+            color: #6c6c6c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        #login {
+            text-align: center;
+            margin: 40px 0 0 40vw;
+            width: 98%;
+            max-width: 500px;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #eaeaea;
+        }
+        #main {
+            text-align: center;
+            padding: 40px 0;
+        }
+        #main-content {
+            display: inline-block;
+            width: 100%;
+            padding: 0 20px;
+            max-width: 500px;
+            text-align: left;
+        }
+        #main-title {
+            font-size: 24px;
+            color: var(--el-color-primary);
+            line-height: 1.7;
+        }
+        #title {
+            font-size: 18px;
+            margin-bottom: 50px;
+        }
+        .label {
+            margin: 20px 0;
+        }
+        .label > span {
+            font-size: 14px;
+            color: #808080;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-container>
+            <el-header style="padding: 0;">
+                <div id="header">
+                    <div class="brand">
+                        <img src="/assets/images/exence.svg" alt="Exence">
+                    </div>
+                    <div class="nav">
+                        <el-link type="primary" href="https://github.com/imkysou/exence" target="_blank">Github</el-link>
+                        <span>v1.0</span>
+                    </div>
+                </div>
+            </el-header>
+            <el-main id="main">
+                <div id="main-content">
+                    <div id="main-title">登录 Exence</div>
+                    <div id="title">您还未登录后台，请先登录后台</div>
+                    <div class="label">
+                        <span>用户名</span>
+                        <el-input v-model="username" placeholder="用户名"></el-input>
+                    </div>
+                    <div class="label">
+                        <span>密码</span>
+                        <el-input type="password" v-model="password" placeholder="密码"></el-input>
+                    </div>
+                    <div class="label">
+                        <span>验证码</span>
+                        <el-input v-model="captcha" maxlength="5" placeholder="验证码">
+                            <template #append>
+                                <img src="/api/captcha?e" id="captcha" alt="captcha" height="28" onclick="this.src+=1">
+                            </template>
+                        </el-input>
+                    </div>
+                    <div class="label" style="margin-top: 40px">
+                        <el-button @click="login" :disabled="!btnEnable" type="primary" style="width: 100%">{{ btnEnable ? '登录' : '登录中' }}</el-button>
+                    </div>
+                </div>
+            </el-main>
+            <el-footer>
+                <div id="footer">
+                    由 <el-link type="primary" target="_blank" href="https://github.com/imkysou/exence">Exence</el-link> 强力驱动
+                </div>
+            </el-footer>
+        </el-container>
+    </div>
+</body>
+<script>
+    const App = {
+        data() {
+            return {
+                "username": "",
+                "password": "",
+                "captcha": "",
+                "btnEnable": true
+            }
+        },
+        methods: {
+            login() {
+                this.btnEnable = false;
+                const formData = new URLSearchParams();
+                formData.append("username", this.username);
+                formData.append("password", this.password);
+                formData.append("captcha", this.captcha);
+                // 在登录失败、成功后使用逗号，弱化请求过程。
+                axios.post("/api/admin/login", formData).then(res => {
+                    // 在此处简单的使用dom而非vue的响应式，因为这里不需要响应式
+                    document.querySelector("#captcha").src += 1;
+                    this.captcha = "";
+                    console.log(res);
+                    if (res.data.code == 1) {
+                        ElementPlus.ElMessage.error('登录失败，' + res.data.msg);
+                        this.btnEnable = true;
+                    } else if (res.data.code == 0) {
+                        // 登录成功就不再取消“登录中”
+                        ElementPlus.ElMessage.success('登录成功，即将带您跳转至后台。');
+                        window.location.href = "panel/home.html";
+                    }
+                }).catch(error => {
+                    // 在此处简单的使用dom而非vue的响应式，因为这里不需要响应式
+                    document.querySelector("#captcha").src += 1;
+                    this.captcha = "";
+                    console.log(error);
+                    ElementPlus.ElMessage.error('登录失败，网络错误');
+
+                    this.btnEnable = true;
+                })
+            }
+        },
+        mounted() {
+            // 检测用户登录状态
+            axios.get("/api/admin/state").then(res => {
+                console.log(res);
+                if (res.data.code == 0) {
+                    this.btnEnable = false;
+                    ElementPlus.ElMessage.success('您已登录后台，即将带您跳转至后台');
+                    window.location.href = "panel/home.html";
+                } else {
+                    ElementPlus.ElMessage.error('请先登录');
+                }
+            })
+        }
+    }
+    const app = Vue.createApp(App);
+    app.use(ElementPlus);
+    app.mount('#app');
+</script>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - Exence</title>
+    <link rel="stylesheet" href="//unpkg.com/element-plus/dist/index.css" />
+    <link rel="stylesheet" href="//cdn.bootcdn.net/ajax/libs/reseter.css/2.0.0/reseter.min.css">
+    <script src="//unpkg.com/vue@3"></script>
+    <script src="//unpkg.com/element-plus"></script>
+    <script src="//cdn.bootcdn.net/ajax/libs/axios/1.9.0/axios.min.js"></script>
+
+    <style>
+        body {
+            background: #fafafa;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        #header {
+            border-bottom: 1px solid #eaeaea;
+            padding: 6px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+        }
+        #header > .brand > img {
+            height: 48px;
+        }
+        #header > .nav {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+        #footer {
+            font-size: 14px;
+            color: #6c6c6c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        #field {
+            padding: 90px 40px 40px 40px;
+            border-radius: 10px;
+            background: linear-gradient(30deg, #0072ff, #3ba1ff);
+            color: white;
+            margin-bottom: 20px;
+        }
+        #field > .title {
+            font-size: 26px;
+            font-weight: bold;
+        }
+        #field > .subtitle {
+            font-weight: 300;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-container>
+            <el-header style="padding: 0;">
+                <div id="header">
+                    <div class="brand">
+                        <img src="/assets/images/exence.svg" alt="Exence">
+                    </div>
+                    <div class="nav">
+                        <el-link type="primary" href="https://github.com/imkysou/exence" target="_blank">Github</el-link>
+                        <span>v1.0</span>
+                    </div>
+                </div>
+            </el-header>
+            <el-main id="main">
+                <div id="field">
+                    <div class="title">Exence</div>
+                    <div class="subtitle">欢迎您使用 Exence 产品，今天又是美好的一天呢！</div>
+                </div>
+                <el-row :gutter="10">
+                    <el-col :sm="24" :md="12">
+                        <el-card>
+                            <template #header>
+                                <b>系统信息</b>
+                            </template>
+                            <el-row style="margin: 6px 0;">
+                                <el-col :span="6">管理员昵称</el-col>
+                                <el-col :span="18">NaN</el-col>
+                            </el-row>
+                            <el-row style="margin: 6px 0;">
+                                <el-col :span="6">管理员级别</el-col>
+                                <el-col :span="18">NaN</el-col>
+                            </el-row>
+                            <el-row style="margin: 6px 0;">
+                                <el-col :span="6">软件名称</el-col>
+                                <el-col :span="18">Exence v1.0</el-col>
+                            </el-row>
+                            <el-row style="margin: 6px 0;">
+                                <el-col :span="6">网站主题</el-col>
+                                <el-col :span="18">NaN</el-col>
+                            </el-row>
+                            <el-row style="margin: 6px 0;">
+                                <el-col :span="6">SSL</el-col>
+                                <el-col :span="18">未启用</el-col>
+                            </el-row>
+                            <el-row style="margin: 6px 0;">
+                                <el-col :span="6">SMTP</el-col>
+                                <el-col :span="18">未启用</el-col>
+                            </el-row>
+                        </el-card>
+                    </el-col>
+                    <el-col :sm="24" :md="12">
+                        <el-card>
+                            <template #header>
+                                <b>作者的话</b>
+                            </template>
+                            <div style="line-height: 24px;">
+                                Exence 是一个使用Node.js编写的，用于为我的世界服务器提供官方网站模板、网站注册游戏账号等功能。目前项目处于初期阶段，部分内容可能不完善，还请谅解。我诚挚的希望您能够为项目开发做出宝贵的建议和贡献，诚挚的欢迎您参加Exence的开发工作，更欢迎您参加Exence周边主题、插件的创作，这些将使得Exence更加完善和美好。
+                            </div>
+                            <el-row style="margin: 6px 0;">
+                                <el-col :span="6">Github</el-col>
+                                <el-col :span="18"><el-link target="_blank" href="https://github.com/imkysou/exence">https://github.com/imkysou/exence</el-link></el-col>
+                            </el-row>
+                        </el-card>
+                    </el-col>
+                </el-row>
+            </el-main>
+            <el-footer>
+                <div id="footer">
+                    由 <el-link type="primary" target="_blank" href="https://github.com/imkysou/exence">Exence</el-link> 强力驱动
+                </div>
+            </el-footer>
+        </el-container>
+    </div>
+</body>
+<script>
+    const App = {
+        data() {
+            return {
+            }
+        },
+        methods: {
+        },
+        mounted() {
+            // 检测用户登录状态
+            axios.get("/api/admin/state").then(res => {
+                console.log(res);
+                if (res.data.code == 1) {
+                    ElementPlus.ElMessage.error('请先登录');
+                    window.location.href = "../index.html";
+                }
+            })
+        }
+    }
+    const app = Vue.createApp(App);
+    app.use(ElementPlus);
+    app.mount('#app');
+</script>
+</html>
