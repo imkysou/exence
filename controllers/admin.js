@@ -3,7 +3,7 @@ const info = require("../utils/info");
 const CaptchaGenerator = require("../utils/captcha");
 const ExAdmin = require("../services/ex_admin");
 const ExConfigs = require("../services/ex_configs");
-const ExServers = require("../services/ex_servers");
+const ExServers = require("../services/ex_servers.js");
 
 
 const captchaGenerator = new CaptchaGenerator();

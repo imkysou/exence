@@ -8,6 +8,8 @@ const info = require("./utils/info");
 const CaptchaGenerator = require("./utils/captcha");
 const ex_sqlite = require("./drivers/ex_sqlite");
 const adminRouter = require("./routers/admin");
+const themeRouter = require("./routers/theme");
+const serverRouter = require("./routers/server");
 
 const captchaGenerator = new CaptchaGenerator({
     width: 150,
@@ -28,10 +30,11 @@ app.use('/', (req, res, next) => {
     next();
 })
 
-app.use('/', express.static(path.join(__dirname, 'themes/' + config.theme)))
-app.use('/assets', express.static(path.join(__dirname, 'public')));
+app.use('/', themeRouter(config.theme, ex_sqlite));
+app.use('/public', express.static(path.join(__dirname, `themes/${config.theme}/public`)));
 
 app.use('/api/admin', adminRouter(app, ex_sqlite)); // Admin-API服务
+app.use('/api/server', serverRouter(app, ex_sqlite)); // Server-API服务
 app.use(config.admin.path, express.static(path.join(__dirname, 'admincp'))); //Admin-CP服务
 
 app.get('/api/captcha', async (req, res) => {

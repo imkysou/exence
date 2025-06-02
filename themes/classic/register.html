@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta content="telephone=no, address=no" name="format-detection">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title><%=site_name=> :: 注册</title>
+    <link rel="icon" href="public/favicon.ico">
+    <link rel="stylesheet" href="public/style/index.css">
+    <script src="public/script/jquery-3.6.0.min.js"></script>
+    <script src="//cdn.bootcdn.net/ajax/libs/axios/1.9.0/axios.min.js"></script>
+
+    <style>
+        #form {
+            background: white;
+            border-radius: 6px;
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            box-sizing: border-box;
+            margin: 40px 100px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: normal;
+            margin: 0;
+            color: #005eff;
+        }
+        label {
+            display: block;
+            margin: 30px 0 20px;
+        }
+        label > span {
+            display: block;
+            font-size: 14px;
+            color: #666;
+        }
+        input {
+            outline: none;
+            border: none;
+            border-bottom: 1px #666 solid;
+            font-size: 16px;
+            padding: 10px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 5px 0;
+        }
+        button {
+            background-color: #005eff;
+            color: white;
+            width: 100%;
+            padding: 10px 20px;
+            display: block;
+            box-sizing: border-box;
+            text-align: center;
+            outline: none;
+            border: none;
+            border-radius: 6px;
+            margin-top: 50px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div id="page-top">
+    <div id="header">
+        <div id="header-icon">
+            <img src="public/favicon.ico" alt="<%=site_name=>">
+        </div>
+        <div id="header-nav">
+            <div class="link"><a href="#" target="_blank"><span style="color:#007bff">主页</span></a></div>
+            <div class="link" onclick="copyIp()" id="copyAddress">复制IP</div>
+            <div class="link"><a href="/register">注册账号</a></div>
+        </div>
+    </div>
+    <div id="form">
+        <h1>注册 <%=site_name=> 账号</h1>
+        <input hidden value="<%=default_server=>" disabled id="id">
+        <label>
+            <span>游戏名</span>
+            <input type="text" placeholder="请输入游戏名" id="name">
+        </label>
+        <label>
+            <span>邮箱</span>
+            <input type="text" placeholder="请输入邮箱" id="email">
+        </label>
+        <label>
+            <span>密码</span>
+            <input type="password" placeholder="请输入密码" id="password">
+        </label>
+        <label>
+            <span>验证码</span>
+            <input type="text" maxlength="5" placeholder="请输入验证码" id="captcha">
+            <img src="/api/captcha?1" onclick="this.src+=1" id="captcha-img" />
+        </label>
+        <button onclick="register()">注册账号</button>
+    </div>
+</div>
+</body>
+<script>
+    function copyIp(){
+        let copy = document.createElement("textarea");
+        copy.style.position = "absolute";
+        copy.style.left = "-99999px";
+        copy.style.top = "0";
+        copy.setAttribute("id", "ta");
+        document.body.appendChild(copy);
+        copy.textContent = "<%=game_ip=>";
+        copy.select();
+        document.execCommand("copy");
+        document.getElementById("copyAddress").innerHTML = "复制中..";
+        setTimeout(function(){
+            document.getElementById("copyAddress").innerHTML = "<span style='font-weight: 300'>复制成功！</span>";
+        },1000)
+        setTimeout(function(){
+            document.getElementById("copyAddress").innerHTML = "复制IP";
+        },1900)
+    }
+
+    function register() {
+        let name = document.querySelector("#name").value;
+        let email = document.querySelector("#email").value;
+        let password = document.querySelector("#password").value;
+        let captcha = document.querySelector("#captcha").value;
+        let id = document.querySelector("#id").value;
+        if (name == "" || email == "" || password == "" || captcha == "") {
+            alert("请填写所有信息");
+            return;
+        }
+        let searchParams = new URLSearchParams();
+        searchParams.append("name", name);
+        searchParams.append("email", email);
+        searchParams.append("password", password);
+        searchParams.append("captcha", captcha);
+        searchParams.append("id", id);
+        axios.post("/api/server/register", searchParams).then((res)=>{
+            console.log(res);
+            if (res.data.code == 0) {
+                alert("注册成功，您现在可以登录游戏了！");
+                document.querySelector("#captcha-img").src+=1;
+            } else {
+                alert("注册失败，" + res.data.msg);
+                document.querySelector("#captcha-img").src+=1;
+            }
+        }).catch((err)=>{
+            alert("网络错误，" + err);
+            document.querySelector("#captcha-img").src+=1;
+        })
+    }
+</script>
+</html>

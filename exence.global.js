@@ -6,7 +6,7 @@ module.exports = {
     // 网站端口（默认为80）
     "port": "80",
     // 网站主题（请在themes下创建）
-    "theme": "simple",
+    "theme": "classic",
     "ssl": {
         // 如果您为您的网站申请了SSL，请在此处启用
         "enabled": false,

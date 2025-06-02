@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta content="telephone=no, address=no" name="format-detection">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title><%=site_name=> :: 主页</title>
+    <link rel="icon" href="public/favicon.ico">
+    <link rel="stylesheet" href="public/style/index.css">
+    <script src="public/script/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div id="page-top">
+    <div id="header">
+        <div id="header-icon">
+            <img src="public/favicon.ico" alt="<%=site_name=>">
+        </div>
+        <div id="header-nav">
+            <div class="link"><a href="#" target="_blank"><span style="color:#007bff">主页</span></a></div>
+            <div class="link" onclick="copyIp()" id="copyAddress">复制IP</div>
+            <div class="link"><a href="/register">注册账号</a></div>
+        </div>
+    </div>
+    <div id="page-header-inner">
+        <div id="page-header-inner-left">
+            <div class="big-title">
+                <h3><%=site_name=></h3>
+                <h6>我的世界小游戏群组服</h6>
+            </div>
+            <div id="playercount"><p>与<span id="playerNum">N/A</span>人在<span><%=game_ip=></span>游玩</p></div>
+        </div>
+        <div id="page-header-inner-right">
+            <img src="images/player.webp" alt="玩家">
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    function copyIp(){
+        let copy = document.createElement("textarea");
+        copy.style.position = "absolute";
+        copy.style.left = "-99999px";
+        copy.style.top = "0";
+        copy.setAttribute("id", "ta");
+        document.body.appendChild(copy);
+        copy.textContent = "<%=game_ip=>";
+        copy.select();
+        document.execCommand("copy");
+        document.getElementById("copyAddress").innerHTML = "复制中..";
+        setTimeout(function(){
+            document.getElementById("copyAddress").innerHTML = "<span style='font-weight: 300'>复制成功！</span>";
+        },1000)
+        setTimeout(function(){
+            document.getElementById("copyAddress").innerHTML = "复制IP";
+        },1900)
+    }
+    function displayGongGao(){document.getElementById("gong_gao").style.display="block";}
+    function closeGongGao(){document.getElementById("gong_gao").style.display="none";}
+    function updatePlayercount() {
+        let game_ip = "<%=game_ip=>";
+        if (game_ip.indexOf(":") == -1){
+            game_ip = game_ip + "/25565";
+        } else {
+            game_ip = game_ip.replace(":", "/");
+        }
+        $.get(`https://api.bybilly.uk/api/players/${game_ip}`, (result) => {
+            if (result.hasOwnProperty('online')) {
+                $("#playerNum").html(result.online)
+            } else {
+                $("#playercount").html("服务器已离线");
+            }
+        });
+    };
+    updatePlayercount();
+</script>
+</html>
