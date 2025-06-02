@@ -4,21 +4,25 @@ class ExConfigs {
     }
     
     getData(name, callback) {
-        return this.db.get("SELECT data FROM configs WHERE name = ?", [name]);
+        return this.db.get("SELECT data FROM ex_configs WHERE name = ?", [name], callback);
     }
 
     updateData(name, data, callback) {
-        return this.db.run("UPDATE configs SET data = ? WHERE name = ?", [data, name]);
+        return this.db.run("UPDATE ex_configs SET data = ? WHERE name = ?", [data, name], callback);
     }
 
     // 主要用于后台插入模板数据
     insertData(name, data, callback) {
-        return this.db.run("INSERT INTO configs (name, data) VALUES (?, ?)", [name, data]);
+        return this.db.run("INSERT INTO ex_configs (name, data) VALUES (?, ?)", [name, data], callback);
     }
 
     // 主要用于后台删除模板数据
     deleteData(name, callback) {
-        return this.db.run("DELETE FROM configs WHERE name = ?", [name]);
+        return this.db.run("DELETE FROM ex_configs WHERE name = ?", [name], callback);
+    }
+
+    listData(callback) {
+        return this.db.all("SELECT * FROM ex_configs", callback);
     }
 }
 

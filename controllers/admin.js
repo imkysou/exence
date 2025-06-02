@@ -2,6 +2,8 @@ const crypto = require("crypto");
 const info = require("../utils/info");
 const CaptchaGenerator = require("../utils/captcha");
 const ExAdmin = require("../services/ex_admin");
+const ExConfigs = require("../services/ex_configs");
+const ExServers = require("../services/ex_servers");
 
 
 const captchaGenerator = new CaptchaGenerator();
@@ -10,6 +12,8 @@ class Admin {
         this.app = app;
         this.db = ex_sqlite;
         this.exAdmin = new ExAdmin(ex_sqlite);
+        this.exConfigs = new ExConfigs(ex_sqlite);
+        this.exServers = new ExServers(ex_sqlite);
     }
     async login(req, res) {
         try {
@@ -75,8 +79,203 @@ class Admin {
             });
         }
     }
-    systemInfo(req, res) {
-        
+    configs(req, res) {
+        if (req.session.admin) {
+            this.exConfigs.listData((err, rows) => {
+                if (err) {
+                    info('error', '数据库错误:' + err);
+                    return res.json({
+                        code: 1,
+                        msg: "数据库错误"
+                    });
+                }
+                return res.json({
+                    code: 0,
+                    msg: "获取成功",
+                    data: rows
+                });
+            })
+        } else {
+            return res.json({
+                code: 1,
+                msg: "未登录"
+            });
+        }
+    }
+    delConfig(req, res) {
+        try {
+            if (req.session.admin) {
+                const { name } = req.body;
+                this.exConfigs.deleteData(name, (err, row) => {
+                    if (err) {
+                        info('error', '数据库错误:' + err);
+                        return res.json({
+                            code: 1,
+                            msg: "数据库错误"
+                        });
+                    }
+                    return res.json({
+                        code: 0,
+                        msg: "删除成功"
+                    });
+                })
+            }
+        } catch (err) {
+            info('error', '服务器错误:' + err);
+            res.json({
+                code: 1,
+                msg: "服务器错误"
+            });
+        }
+    }
+    updateConfig(req, res) {
+        try {
+            if (req.session.admin) {
+                const { name, data } = req.body;
+                this.exConfigs.updateData(name, data, (err, row) => {
+                    if (err) {
+                        info('error', '数据库错误:' + err);
+                        return res.json({
+                            code: 1,
+                            msg: "数据库错误"
+                        });
+                    }
+                    return res.json({
+                        code: 0,
+                        msg: "更新成功"
+                    });
+                })
+            }
+        } catch (err) {
+            info('error', '服务器错误:' + err);
+            res.json({
+                code: 1,
+                msg: "服务器错误"
+            });
+        }
+    }
+    insertConfig(req, res) {
+        try {
+            if (req.session.admin) {
+                const { name, data } = req.body;
+                this.exConfigs.insertData(name, data, (err, row) => {
+                    if (err) {
+                        info('error', '数据库错误:' + err);
+                        return res.json({
+                            code: 1,
+                            msg: "数据库错误"
+                        });
+                    }
+                    return res.json({
+                        code: 0,
+                        msg: "插入成功"
+                    });
+                })
+            }
+        } catch (err) {
+            info('error', '服务器错误:' + err);
+            res.json({
+                code: 1,
+                msg: "服务器错误"
+            });
+        }
+    }
+
+    servers(req, res) {
+        if (req.session.admin) {
+            this.exServers.listServers((err, rows) => {
+                if (err) {
+                    info('error', '数据库错误:' + err);
+                    return res.json({
+                        code: 1,
+                        msg: "数据库错误"
+                    });
+                }
+                return res.json({
+                    code: 0,
+                    msg: "获取成功",
+                    data: rows
+                });
+            })
+        }
+    }
+    updateServer(req, res) {
+        try {
+            if (req.session.admin) {
+                const { id, name, plugin, filepath, email_verify, serverip } = req.body;
+                this.exServers.updateServer(id, name, plugin, filepath, email_verify, serverip, (err, row) => {
+                    if (err) {
+                        info('error', '数据库错误:' + err);
+                        return res.json({
+                            code: 1,
+                            msg: "数据库错误"
+                        });
+                    }
+                    return res.json({
+                        code: 0,
+                        msg: "更新成功"
+                    });
+                })
+            }
+        } catch {
+            info('error', '服务器错误:' + err);
+            res.json({
+                code: 1,
+                msg: "服务器错误"
+            });
+        }
+    }
+    insertServer(req, res) {
+        try {
+            if (req.session.admin) {
+                const { name, plugin, filepath, email_verify, serverip } = req.body;
+                this.exServers.insertServer(name, plugin, filepath, email_verify, serverip, (err, row) => {
+                    if (err) {
+                        info('error', '数据库错误:' + err);
+                        return res.json({
+                            code: 1,
+                            msg: "数据库错误"
+                        });
+                    }
+                    return res.json({
+                        code: 0,
+                        msg: "插入成功"
+                    });
+                })
+            }
+        } catch {
+            info('error', '服务器错误:' + err);
+            res.json({
+                code: 1,
+                msg: "服务器错误"
+            });
+        }
+    }
+    delServer(req, res) {
+        try {
+            if (req.session.admin) {
+                const { id } = req.body;
+                this.exServers.deleteServer(id, (err, row) => {
+                    if (err) {
+                        info('error', '数据库错误:' + err);
+                        return res.json({
+                            code: 1,
+                            msg: "数据库错误"
+                        });
+                    }
+                    return res.json({
+                        code: 0,
+                        msg: "删除成功"
+                    });
+                })
+            }
+        } catch {
+            info('error', '服务器错误:' + err);
+            res.json({
+                code: 1,
+                msg: "服务器错误"
+            });
+        }
     }
 }
 
