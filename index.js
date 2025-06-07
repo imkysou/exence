@@ -172,6 +172,10 @@ if (config.ssl.enabled === true) {
         redirectServer.listen(config.port, () => {
             info('info', `HTTP服务器已在http://localhost:${config.port}启用，当您通过http方式访问网站时，将自动重定向到https。`);
         });
+    } else {
+        app.listen(config.port, () => {
+            info('info', `HTTP服务器已在http://localhost:${config.port}启用`);
+        });
     }
 } else {
     app.listen(config.port, () => {
