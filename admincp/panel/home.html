@@ -68,7 +68,7 @@
                     </div>
                     <div class="nav">
                         <el-link type="primary" href="https://github.com/imkysou/exence" target="_blank">Github</el-link>
-                        <span>v1.0</span>
+                        <span>v1.1</span>
                     </div>
                 </div>
             </el-header>
@@ -98,6 +98,13 @@
                                     </template>
                                 </el-table-column>
                             </el-table>
+                        </el-card>
+                        <el-card style="margin-top: 10px;">
+                            <template #header>
+                                <b>更改密码</b>
+                            </template>
+                            <p style="margin: 0 0 20px;">您可以在此处更改您的管理员密码，更改密码后，您无需重新登录。</p>
+                            <el-button @click="changePwd" type="primary">更改密码</el-button>
                         </el-card>
                     </el-col>
                     <el-col :sm="24" :md="12">
@@ -247,7 +254,14 @@
                     }
                     let formData = new URLSearchParams();
                     formData.append("name", value.split(":")[0]);
-                    formData.append("data", value.split(":")[1]);
+                    // formData.append("data", value.split(":")[1]);
+                    let dataStr = "";
+                    for (let i = 1; i < value.split(":").length; i++) {
+                        dataStr += value.split(":")[i] + ":";
+                    }
+                    // 删除dataStr最后一位的:
+                    dataStr = dataStr.substring(0, dataStr.length - 1);
+                    formData.append("data", dataStr);
                     axios.post("/api/admin/insertConfig", formData).then(res => {
                         if (res.data.code == 0) {
                             ElementPlus.ElMessage.success('创建成功');
@@ -319,6 +333,24 @@
                 this.sEmailVerify = "";
                 this.sServerip = "";
                 this.sId = "";
+            },
+            changePwd() {
+                ElementPlus.ElMessageBox.prompt('请输入新密码', '修改密码', {
+                    confirmButtonText: '修改',
+                    cancelButtonText: '取消'
+                }).then(({ value }) => {
+                    let formData = new URLSearchParams();
+                    formData.append("password", value);
+                    axios.post("/api/admin/changePwd", formData).then(res => {
+                        if (res.data.code == 0) {
+                            ElementPlus.ElMessage.success('修改成功');
+                        } else {
+                            ElementPlus.ElMessage.error('修改失败，' + res.data.msg);
+                        }
+                    }).catch(error => {
+                        ElementPlus.ElMessage.error('修改失败，网络错误');
+                    })
+                }).catch()
             }
         },
         mounted() {

@@ -277,6 +277,37 @@ class Admin {
             });
         }
     }
+    changePwd(req, res) {
+        // 当前版本只支持更改唯一admin账号的密码
+        try {
+            if (req.session.admin) {
+                const { password } = req.body;
+                const { username } = req.session.admin;
+                const sha256 = crypto.createHash("sha256");
+                sha256.update(password);
+                const sha256Password = sha256.digest("hex");
+                this.exAdmin.updatePassword(username, sha256Password, (err, row) => {
+                    if (err) {
+                        info('error', '数据库错误:' + err);
+                        return res.json({
+                            code: 1,
+                            msg: "数据库错误"
+                        });
+                    }
+                    return res.json({
+                        code: 0,
+                        msg: "更改成功"
+                    });
+                })
+            }
+        } catch {
+            info('error', '服务器错误:' + err);
+            res.json({
+                code: 1,
+                msg: "服务器错误"
+            });
+        }
+    }
 }
 
 module.exports = Admin;

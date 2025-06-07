@@ -14,6 +14,10 @@ class ExAdmin {
     listAdmins(callback) {
         return this.db.get("SELECT * FROM ex_admin", callback);
     }
+
+    updatePassword(username, password, callback) {
+        return this.db.run("UPDATE ex_admin SET password = ? WHERE username = ?", [password, username], callback);
+    }
 }
 
 module.exports = ExAdmin;

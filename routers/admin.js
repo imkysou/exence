@@ -15,6 +15,7 @@ module.exports = function(app, ex_sqlite) {
     router.post("/delServer", controller.delServer.bind(controller));
     router.post("/updateServer", controller.updateServer.bind(controller));
     router.post("/insertServer", controller.insertServer.bind(controller));
+    router.post("/changePwd", controller.changePwd.bind(controller));
 
     return router;
 }

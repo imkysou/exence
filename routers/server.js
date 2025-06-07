@@ -7,6 +7,7 @@ module.exports = function(app, ex_sqlite) {
 
     router.get("/info", controller.info.bind(controller));
     router.post("/register", controller.register.bind(controller));
+    router.post("/sendVerifyEmail", controller.sendVerifyEmail.bind(controller));
 
     return router;
 }

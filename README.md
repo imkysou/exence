@@ -1,6 +1,4 @@
 ## Exence 1.0.0
-Exence是一个使用JavaScript编写的，为我的世界服务器提供官方网站、网站注册等功能。
+<img src="https://img.shields.io/github/contributors/imkysou/exence" /> <img src="https://img.shields.io/github/license/imkysou/exence" /> <img src="https://img.shields.io/github/commit-activity/m/imkysou/exence" />
 
-需要注意的是Exence项目正处于起步阶段，目前Exence仅支持如下登录插件：
-
-- AuthMeReloaded
+Exence 是一个基于 `Node.js` 编写的，专为MC服主而生，且可以为安装了类似于 [AuthMeReloaded](https://www.spigotmc.org/resources/authmereloaded.6269/) 的 Minecraft 服务器提供网站上注册的功能。

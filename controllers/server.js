@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 const config = require("../exence.global");
@@ -14,6 +15,7 @@ class Server {
         this.db = ex_sqlite;
         this.exServers = new ExServers(ex_sqlite);
         this.hash = Math.random().toString(36).substr(2);
+        this.transporter = nodemailer.createTransport(config.email_verify.smtp);
     }
 
     info(req, res) {
@@ -72,6 +74,32 @@ class Server {
                 });
             }
 
+            // 检测邮箱是否正确
+            if (!email || !email.match(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/)) {
+                return res.json({
+                    code: 1,
+                    msg: "邮箱格式错误"
+                });
+            }
+
+            // 若启用邮箱验证，检测验证码是否正确
+            if (config.email_verify.enable) {
+                if (!req.session.emailVerifyCode) {
+                    return res.json({
+                        code: 1,
+                        msg: "请先获取邮箱验证码"
+                    });
+                }
+                if (!req.body.emailVerifyCode || req.body.emailVerifyCode !== req.session.emailVerifyCode) {
+                    return res.json({
+                        code: 1,
+                        msg: "邮箱验证码错误"
+                    });
+                }
+                // 清除邮箱验证码
+                delete req.session.emailVerifyCode;
+            }
+
             let row;
             this.exServers.getServer(id, (err, row) => {
                 if (err) {
@@ -110,7 +138,8 @@ class Server {
                     ip = req.headers[config.remoteIP.Header];
                 }
 
-                db.run(`INSERT INTO authme (username, realname, password, ip, email) VALUES (?, ?, ?, ?, ?)`, [name.toLowerCase(), name, pwd, ip, email], (err) => {
+                // 先检测游戏名是否已经存在
+                db.get(`SELECT * FROM authme WHERE username = ?`, [name.toLowerCase()], (err, row) => {
                     if (err) {
                         info('error', '数据库错误:' + err);
                         return res.json({
@@ -118,11 +147,26 @@ class Server {
                             msg: "数据库错误"
                         });
                     }
-                    db.close();
-                    return res.json({
-                        code: 0,
-                        msg: "成功注册游戏账号"
-                    });
+                    if (row) {
+                        return res.json({
+                            code: 1,
+                            msg: "游戏名已存在"
+                        });
+                    }
+                    db.run(`INSERT INTO authme (username, realname, password, ip, email) VALUES (?, ?, ?, ?, ?)`, [name.toLowerCase(), name, pwd, ip, email], (err) => {
+                        if (err) {
+                            info('error', '数据库错误:' + err);
+                            return res.json({
+                                code: 1,
+                                msg: "数据库错误"
+                            });
+                        }
+                        db.close();
+                        return res.json({
+                            code: 0,
+                            msg: "成功注册游戏账号"
+                        });
+                    })
                 })
             });
         } catch(err) {
@@ -134,6 +178,48 @@ class Server {
         }
     }
 
+    sendVerifyEmail(req, res) {
+        try {
+            const { email } = req.body;
+            const verifyCode = Math.random().toString().substr(2, 6);
+            // 检查邮箱格式
+            if (!email || !email.match(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/)) {
+                return res.json({
+                    code: 1,
+                    msg: "邮箱格式错误"
+                });
+            }
+            // 邮件对象
+            const mailOptions = {
+                html: "您正在注册Minecraft服务器账号，您的验证码为：" + verifyCode,
+                from: config.email_verify.from,
+                to: email,
+                subject: "您的验证码为" + verifyCode
+            };
+            // 将邮箱验证码写入cookie
+            req.session.emailVerifyCode = verifyCode;
+            // 发送邮件
+            this.transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    info('error', '发送邮件失败:' + error);
+                    return res.json({
+                        code: 1,
+                        msg: "发送邮件失败"
+                    });
+                }
+                return res.json({
+                    code: 0,
+                    msg: "发送邮件成功"
+                });
+            });
+        } catch(err) {
+            info('error', '服务器错误，' + err);
+            return res.json({
+                code: 1,
+                msg: "服务器错误"
+            });
+        }
+    }
 }
 
 module.exports = Server;

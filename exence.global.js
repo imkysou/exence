@@ -5,6 +5,10 @@
 module.exports = {
     // 网站端口（默认为80）
     "port": "80",
+    // 模板端口（默认为9897），此端口无法直接被访问，也无需配置防火墙启用。
+    // 此端口的修改不影响程序正常使用，SSL不会应用到此端口。
+    // 此处允许修改此端口的唯一目的是为了防止此端口与已有端口重合。
+    "template_port": "9897",
     // 网站主题（请在themes下创建）
     "theme": "classic",
     "ssl": {
@@ -36,17 +40,18 @@ module.exports = {
     "email_verify": {
         // 启动邮件验证
         "enable": false,
-
-        // 邮件服务器配置
-        "host": "",
-        "port": 465,
-        "secure": true,
-        "auth": {
-            "user": "",
-            "pass": ""
-        },
-
-        // 邮件发送者
+        // 发送者
         "from": "",
+
+        // SMTP服务器配置
+        "smtp": {
+            "host": "",
+            "port": 465,
+            "secure": true,
+            "auth": {
+                "user": "",
+                "pass": ""
+            }
+        }
     }
 }
